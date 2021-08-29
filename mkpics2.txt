@@ -1,0 +1,65 @@
+#!/bin/sh
+column=$1
+start=0
+variable=0
+# checking if the commandline argument is a directory
+if [ $column -eq $column 2>/dev/null ] && [ $column -gt 0 2>/dev/null ] && [ $# -eq 2 ];
+then
+	shift
+	if [ -d "$1" ];
+	then
+		echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">"
+		echo "<html>"
+		echo "<head>"
+		echo "<title>Pictures</title>"
+		echo "</head>"
+		echo "<body>"
+		echo "<h1>Pictures</h1>"
+		# looping through year subdirectories in the directory passed as a command line arguement
+		for year in $1/*;
+		do
+		# starts printing the contents of the html file
+			echo "<h2>`basename $year`</h2>"	
+			echo "<table>"
+			# looping for month subdirectory in the current year directory
+			for month in $year/*;
+			do
+				# looping through the files in the month subdirectory
+				for file in $month/*;
+				do
+					# source stores the complete path of each file in month subdirectory
+					source=`echo $file`
+					# start acts a counter ti know wether a new row started or not so start=0 mean news row so <tr> needed
+					if test $start -eq 0;
+					then
+						echo "<tr>"
+						start=1
+					fi
+					# variable acts as the counter for filling in pictures and when they equal the row needs to be closed with a </tr>
+					if test $variable -lt $column;
+					then
+						echo "<td><img src=\"$file\" height=100></td>"
+						variable=$((variable+1))
+					else
+						echo "</tr>"
+						start=0
+						variable=0
+					fi
+				done
+			done
+			# if start is not 0 and variable is not 0 and the for loop is done looping through months that means we need to close the last incomplete row
+			# and set start back to 0 and variable to 0 as well for the formation of the table for next year.
+			if test ! $start -eq 0 && test ! $variable -eq 0;
+			then
+				echo "</tr>"
+				start=0
+				varible=0
+			fi
+			echo "</table>"
+			echo "</body>"
+			echo "</html>"
+		done
+	fi
+else 
+	echo "Please provide a valid arguement first being an integer greater than zero and second being a valid directory name"
+fi

@@ -1,0 +1,52 @@
+#!/bin/sh
+passed=$1
+PATH=$PATH:/courses/courses/cscb09w19/bin
+if [ $# -eq 0 ] # checking if any directory has been passed as command line arguement
+then
+	echo "no directory passed as arguement"
+	exit
+fi
+# looping for files in the input directory
+for f in "$1"/*;
+do
+	# checking if the current file is a jpeg or not 
+	if [ `file -b "$f"|cut -b 1,2,3,4` = JPEG ];
+	then
+		# checking if exiftime works for this current file or not
+		if exiftime -tg $f > /dev/null;
+		then
+			# getting year from the current file using cut command after running exiftime on it
+			year=`exiftime -tg $f | cut -d " " -f 3 | cut -d ":" -f 1`
+			# getting month from the current file using cut command after running exiftime on it
+			month=`exiftime -tg $f | cut -d " " -f 3 |cut -d ":" -f 2`
+			# checking if an year diretcory with the year name that we extracted above exists 
+			if [ -d ./$year ]; 
+       			then
+				# checking if a month directory with the month name that we extracted above exists in the year directory and then move file to month
+				# subdirectory
+				if [ -d ./$year/$month ];
+				then
+	       				cp $f ./$year/$month
+				# else create the month subdirectory within the year directory and move the file into it using cp command
+				else
+					mkdir ./$year/$month
+					cp $f ./$year/$month
+				fi
+			# if a year directory with that name doesnt exist create it then create a month subdirectory within it and then move the file into month 
+			# directory
+			else
+				mkdir ./$year
+				mkdir ./$year/$month
+				cp $f ./$year/$month
+			fi
+		# print an error to stderr is exif doesnt exist
+		else
+			echo "Exif doesnt exist" 2> /dev/null
+
+		fi
+	# print an error to stderr that current file is not a jpg
+	else
+ 		echo "not a jpeg" >&2
+	fi
+done
+
